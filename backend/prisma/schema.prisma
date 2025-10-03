@@ -1,0 +1,55 @@
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model User {
+  id           String   @id @default(uuid())
+  email        String   @unique
+  passwordHash String
+  role         String
+  locationLat  Float?
+  locationLng  Float?
+  healthInfo   String?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  devices      Device[]
+}
+
+model Device {
+  id            String   @id @default(uuid())
+  name          String
+  ownerId       String
+  owner         User     @relation(fields: [ownerId], references: [id])
+  lastSeenAt    DateTime?
+  meta          Json?
+  createdAt     DateTime @default(now())
+  telemetry     Telemetry[]
+}
+
+model Telemetry {
+  id         String   @id @default(uuid())
+  deviceId   String
+  device     Device   @relation(fields: [deviceId], references: [id])
+  recordedAt DateTime
+  payload    Json
+  createdAt  DateTime @default(now())
+}
+
+model AirObservation {
+  id          String   @id @default(uuid())
+  source      String
+  lat         Float
+  lng         Float
+  timestamp   DateTime
+  aqi         Int?
+  pm25        Float?
+  no2         Float?
+  ozone       Float?
+  payload     Json
+  createdAt   DateTime @default(now())
+}
